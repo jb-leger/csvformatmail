@@ -1,0 +1,4 @@
+csvformatmail.egg-info/
+csvformatmail/__pycache__/
+dist/
+build/
