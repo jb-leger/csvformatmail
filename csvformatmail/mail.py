@@ -24,7 +24,7 @@ class Mail:
         header = True
         parser = re.compile("^([^:]+): (.*)$")
         formatted_mail = eval(f"f{template!r}", row, glob)
-        for l in formatted_mail.split("\n"):
+        for l in formatted_mail.splitlines():
             if header:
                 m = parser.match(l)
                 if m:
@@ -32,7 +32,7 @@ class Mail:
                     self._header[k] = v
             else:
                 self._text += l + "\n"
-            if len(l) <= 0:
+            if not l and self._header:
                 header = False
         lower_headers = set(h.lower() for h in self._header)
         if "from" not in lower_headers:

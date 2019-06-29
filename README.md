@@ -63,3 +63,52 @@ And the command:
 ```
 csvformatmail template.txt -t a:float -b:float listing.csv
 ```
+
+## Complex example
+
+The template file can contain python definition, and all the column is
+accessible by the names `cols` (default name, can be changed with arg
+`--colsname`). See the following template file:
+
+```
+# python preamble begin
+import numpy as np
+def quartiles(list_values):
+    q1, q2, q3 = np.percentile(list_values, (25,50,75))
+    return f"{q1:.1f}, {q2:.1f}, {q3:.1f}"
+# python preamble end
+From: My name <my-mail-address@example.org>
+To: {mail}
+Subject: Result of the last test
+
+Dear {firstname} {lastname.capitalize()},
+
+Your results of the last test are:
+
+ - Part A: {a:.1f}
+ - Part B: {b:.1f}
+
+For all the class, the mean of part A is {np.mean(cols['a']):.1}, and the
+quartiles are {quartiles(cols['a'])}.
+
+Therefore you {"pass" if a+b>50 else "fail"} the test.
+
+-- 
+signature
+```
+
+## Misc
+
+Consider use function `fill` and `indent` of `textwrap` module. For this you
+need use `-b "import textwrap"` or add a python preamble in you template file.
+_e.g._ in a template to rewrap to 72 chars:
+
+```
+{textwrap.fill(somevalue, width=72)}
+```
+
+Or, for rewrap and indent by `> `:
+
+```
+{textwrap.indent(textwrap.fill(somevalue, width=70), "> ")}
+```

@@ -40,21 +40,47 @@ def parseargs():
         ),
         epilog=textwrap.dedent(
             """
-            Example:
-              - A template file can be:
-                > From: Me <my-mail-address@example.org>
-                > To: {email}
-                > Subject: Your results
-                >
-                > Hi {name.capitalize()},
-                >
-                > You obtain the following result {result}, with the value {value:.1f}
-                >
-                > -- 
-                > me
-              - With a csv file containg columns email, name, result, value.
-              - With the command:
-                  %(prog)s template.txt -t value:float listing.csv
+            Examples:
+
+              - Basic one:
+                - A template file can be:
+                  > From: Me <my-mail-address@example.org>
+                  > To: {email}
+                  > Subject: Your results
+                  >
+                  > Hi {name.capitalize()},
+                  >
+                  > You obtain the following result {result}, with the value {value:.1f}.
+                  >
+                  > -- 
+                  > me
+
+                - With a csv file containg columns email, name, result, value.
+
+                - With the command:
+                    %(prog)s template.txt -t value:float listing.csv
+
+              - More complex template file:
+                  > # python preamble begin
+                  > import numpy as np
+                  > def quartiles(list_values):
+                  >     q1, q2, q3 = np.percentile(list_values, (25,50,75))
+                  >     return f"{q1:.1f}, {q2:.1f}, {q3:.1f}"
+                  > # python preamble end
+                  >
+                  > From: Me <my-mail-address@example.org>
+                  > To: {email}
+                  > Subject: Your results
+                  >
+                  > Hi {name.capitalize()},
+                  >
+                  > You obtain the following result {result}, with the value {value:.1f}.
+                  > For information, for results for the class are:
+                  >  - mean: {np.mean(cols['value']):.1f}
+                  >  - quartiles: {quartiles(cols['value'])}
+                  >
+                  > -- 
+                  > me
             """
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -109,6 +135,14 @@ def parseargs():
             SMTP port (default: 25)
             """,
     )
+    parser.add_argument(
+        "--colsname",
+        default="cols",
+        help="""
+            Name used to access for each row the value of all the columns. See
+            example. Must not be a valid column name. (default: 'cols').
+            """,
+            )
 
     parser.add_argument(
         "--without-confirm",
@@ -152,11 +186,25 @@ def main():
     for before in args.before:
         ast = compile(before, "<string>", "exec")
         exec(ast, fake_global)
+
+    stemplate = template.splitlines()
+    idxbegin,firstline = next((i,l) for i,l in enumerate(stemplate) if l)
+    if firstline.startswith('# python preamble begin'):
+        idxend = next(i for i,l in enumerate(stemplate) if l.startswith('# python preamble end') and i>idxbegin)
+        preamble = '\n'.join(stemplate[(idxbegin+1):idxend])
+        ast = compile(preamble, "<string>", "exec")
+        exec(ast, fake_global)
+        template = '\n'.join(stemplate[(idxend+1):])
+
     for t in args.type:
         t.build_type(fake_global)
         input_csv.add_type(*t.get_coltype)
     mailer = Mailer(args.host, args.port)
-    for row in input_csv.rows_typed:
+    rows = list(input_csv.rows_typed)
+    cols = {c: [r[c] for r in rows] for c in input_csv.fieldnames}
+    for row in rows:
+        if args.colsname not in input_csv.fieldnames:
+            row[args.colsname] = cols
         mail = Mail(template, row, fake_global)
         mailer.add_mail(mail)
     if args.without_confirm:
