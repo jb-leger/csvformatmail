@@ -1,4 +1,4 @@
-# csvformatmail: A tool to manipulate csv file with headers
+# csvformatmail: A tool to format mails from csv and to send them
 
 ## Installing
 
