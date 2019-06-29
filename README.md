@@ -77,6 +77,7 @@ def quartiles(list_values):
     q1, q2, q3 = np.percentile(list_values, (25,50,75))
     return f"{q1:.1f}, {q2:.1f}, {q3:.1f}"
 # python preamble end
+
 From: My name <my-mail-address@example.org>
 To: {mail}
 Subject: Result of the last test
