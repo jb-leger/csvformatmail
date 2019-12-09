@@ -10,6 +10,8 @@ import sys
 import subprocess
 import textwrap
 
+import time
+
 
 def read_template(fn):
     with open(fn) as f:
@@ -65,9 +67,10 @@ class Mailer:
     def add_mail(self, mail):
         self._mails.append(mail)
 
-    def send_mails(self):
+    def send_mails(self, wait=0):
         for mail in self._mails:
             self._mailserver.send_message(mail.to_email())
+            time.sleep(wait)
         self._mails.clear()
 
     def _show_mails_in_pager(self):

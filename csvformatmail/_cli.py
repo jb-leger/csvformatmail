@@ -142,13 +142,23 @@ def parseargs():
             Name used to access for each row the value of all the columns. See
             example. Must not be a valid column name. (default: 'cols').
             """,
-            )
+    )
 
     parser.add_argument(
         "--without-confirm",
         action="store_true",
         help="""
             Send mails without confirmation.
+            """,
+    )
+
+    parser.add_argument(
+        "--wait",
+        "-w",
+        default=0.1,
+        type=float,
+        help="""
+            Wait time between mail, In seconds. (default: 0.1s)
             """,
     )
 
@@ -188,13 +198,17 @@ def main():
         exec(ast, fake_global)
 
     stemplate = template.splitlines()
-    idxbegin,firstline = next((i,l) for i,l in enumerate(stemplate) if l)
-    if firstline.startswith('# python preamble begin'):
-        idxend = next(i for i,l in enumerate(stemplate) if l.startswith('# python preamble end') and i>idxbegin)
-        preamble = '\n'.join(stemplate[(idxbegin+1):idxend])
+    idxbegin, firstline = next((i, l) for i, l in enumerate(stemplate) if l)
+    if firstline.startswith("# python preamble begin"):
+        idxend = next(
+            i
+            for i, l in enumerate(stemplate)
+            if l.startswith("# python preamble end") and i > idxbegin
+        )
+        preamble = "\n".join(stemplate[(idxbegin + 1) : idxend])
         ast = compile(preamble, "<string>", "exec")
         exec(ast, fake_global)
-        template = '\n'.join(stemplate[(idxend+1):])
+        template = "\n".join(stemplate[(idxend + 1) :])
 
     for t in args.type:
         t.build_type(fake_global)
@@ -208,7 +222,7 @@ def main():
         mail = Mail(template, row, fake_global)
         mailer.add_mail(mail)
     if args.without_confirm:
-        mailer.send_mails()
+        mailer.send_mails(args.wait)
     else:
         mailer.prompt()
 
