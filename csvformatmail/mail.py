@@ -61,16 +61,21 @@ class Mail:
 
 class Mailer:
     def __init__(self, host="localhost", port=25):
-        self._mailserver = smtplib.SMTP(host, port)
+        self._host = host
+        self._port = port
         self._mails = []
 
     def add_mail(self, mail):
         self._mails.append(mail)
 
     def send_mails(self, wait=0):
-        for mail in self._mails:
-            self._mailserver.send_message(mail.to_email())
-            time.sleep(wait)
+        ngroups = len(self._mails)//25+1
+        for group in range(ngroups):
+            mailserver = smtplib.SMTP(self._host, self._port)
+            for mail in self._mails[group::ngroups]:
+                mailserver.send_message(mail.to_email())
+                time.sleep(wait)
+            del mailserver
         self._mails.clear()
 
     def _show_mails_in_pager(self):
@@ -92,7 +97,7 @@ class Mailer:
         sp.stdin.write(mails.encode())
         sp.communicate()
 
-    def prompt(self):
+    def prompt(self, wait=0):
         while True:
             print(
                 f"Loaded {len(self._mails)} mails. What do you want to do with?",
@@ -116,7 +121,7 @@ class Mailer:
                 )
                 sentence = input("Confirmation: ")
                 if sentence == validation.format(number=len(self._mails)):
-                    self.send_mails()
+                    self.send_mails(wait)
                     print("Done", file=sys.stderr)
                     return None
                 print("Not confirmed", file=sys.stderr)

@@ -155,10 +155,10 @@ def parseargs():
     parser.add_argument(
         "--wait",
         "-w",
-        default=0.1,
+        default=0.0,
         type=float,
         help="""
-            Wait time between mail, In seconds. (default: 0.1s)
+            Wait time between mail, In seconds. (default: 0s)
             """,
     )
 
@@ -224,7 +224,7 @@ def main():
     if args.without_confirm:
         mailer.send_mails(args.wait)
     else:
-        mailer.prompt()
+        mailer.prompt(args.wait)
 
 
 if __name__ == "__main__":
