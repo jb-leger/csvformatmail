@@ -2,7 +2,7 @@
 
 ## Installing
 
-From pypi (not yet on pypi):
+From pypi:
 
 ```
 pip3 install csvformatmail
@@ -58,10 +58,16 @@ Jacques,MARTIN,jacques.martin@example.org,12.54441,14,1111.221
 …
 ```
 
-And the command:
+And the command if you have a local smtp:
 
 ```
 csvformatmail template.txt -t a:float -t b:float listing.csv
+```
+
+Or if you use a distant smtp:
+
+```
+csvformatmail -h smtp.example.org -l mylogin template.txt -t a:float -t b:float listing.csv
 ```
 
 ## Complex example
