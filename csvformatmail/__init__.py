@@ -1,4 +1,4 @@
-# Copyright 2019, Jean-Benoist Leger <jb@leger.tf>
+# Copyright 2019-2021, Jean-Benoist Leger <jb@leger.tf>
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the
@@ -28,7 +28,7 @@ __title__ = "csvformatmail"
 __author__ = "Jean-Benoist Leger"
 __licence__ = "MIT"
 
-version_info = (0, 1)
+version_info = (0, 2)
 __version__ = ".".join(map(str, version_info))
 
 from .mail import (
