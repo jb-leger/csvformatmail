@@ -9,6 +9,7 @@ import re
 import sys
 import subprocess
 import textwrap
+from getpass import getpass
 
 import time
 
@@ -60,18 +61,28 @@ class Mail:
 
 
 class Mailer:
-    def __init__(self, host="localhost", port=25):
+    def __init__(self, host="localhost", port=25, starttls=False, login=None, password=None):
         self._host = host
         self._port = port
+        self._starttls = starttls
+        self._login = login
+        self._password = password
         self._mails = []
 
     def add_mail(self, mail):
         self._mails.append(mail)
 
     def send_mails(self, wait=0):
+        if self._password is None:
+            self._password = getpass(f"SMTP password for user {self._login}: ")
         ngroups = len(self._mails)//25+1
         for group in range(ngroups):
             mailserver = smtplib.SMTP(self._host, self._port)
+            mailserver.ehlo()
+            if self._starttls:
+                mailserver.starttls()
+                if self._login is not None and self._password is not None:
+                    mailserver.login(self._login, self._password)
             for mail in self._mails[group::ngroups]:
                 mailserver.send_message(mail.to_email())
                 time.sleep(wait)

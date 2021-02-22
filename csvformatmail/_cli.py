@@ -84,11 +84,16 @@ def parseargs():
             """
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
+        add_help=False,
     )
     parser.add_argument(
         "--version", action="version", version="", help=argparse.SUPPRESS
     )
-
+    parser.add_argument(
+        '--help',
+        action='help',
+        default=argparse.SUPPRESS,
+        help=argparse._('show this help message and exit'))
     parser.add_argument(
         "-d",
         "--delim",
@@ -121,19 +126,35 @@ def parseargs():
             """,
     )
     parser.add_argument(
-        "--host",
+        "-h", "--host",
         default="localhost",
         help="""
             SMTP host (default: localhost)
             """,
     )
     parser.add_argument(
-        "--port",
-        default=25,
+        "-p", "--port",
+        default=0,
         type=int,
         help="""
-            SMTP port (default: 25)
+            SMTP port (default: 587 if STARTTLS enabled else 25)
             """,
+    )
+    parser.add_argument(
+        "--starttls",
+        default=False,
+        action="store_true",
+        help="""
+            Enable TLS with STARTTLS.
+            """
+    )
+    parser.add_argument(
+        "-l", "--login",
+        default=None,
+        type=str,
+        help="""
+            Login used for authentification on SMTP server. Implies STARTTLS."
+            """
     )
     parser.add_argument(
         "--colsname",
@@ -213,7 +234,18 @@ def main():
     for t in args.type:
         t.build_type(fake_global)
         input_csv.add_type(*t.get_coltype)
-    mailer = Mailer(args.host, args.port)
+    starttls = args.starttls
+    password = None
+    if args.login is not None:
+        login = args.login
+        starttls = True
+    else:
+        login = None
+    port = args.port
+    if port == 0:
+        port = 587 if starttls else 25
+    mailer = Mailer(args.host, port, starttls=starttls, login=login,
+            password=password)
     rows = list(input_csv.rows_typed)
     cols = {c: [r[c] for r in rows] for c in input_csv.fieldnames}
     for row in rows:
