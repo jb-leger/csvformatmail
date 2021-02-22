@@ -61,7 +61,7 @@ Jacques,MARTIN,jacques.martin@example.org,12.54441,14,1111.221
 And the command:
 
 ```
-csvformatmail template.txt -t a:float -b:float listing.csv
+csvformatmail template.txt -t a:float -t b:float listing.csv
 ```
 
 ## Complex example
