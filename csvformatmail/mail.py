@@ -138,6 +138,9 @@ class Mailer:
                 print("Not confirmed", file=sys.stderr)
                 continue
             elif choice == "show":
-                self._show_mails_in_pager()
+                try:
+                    self._show_mails_in_pager()
+                except BrokenPipeError:
+                    pass
                 continue
             print(f"Incorrect input.\n", file=sys.stderr)
