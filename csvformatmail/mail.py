@@ -61,12 +61,14 @@ class Mail:
 
 
 class Mailer:
-    def __init__(self, host="localhost", port=25, starttls=False, login=None, password=None):
+    def __init__(self, host="localhost", port=25, starttls=False, login=None,
+            password=None, progress=True):
         self._host = host
         self._port = port
         self._starttls = starttls
         self._login = login
         self._password = password
+        self._progress = progress
         self._mails = []
 
     def add_mail(self, mail):
@@ -76,6 +78,7 @@ class Mailer:
         if self._password is None:
             self._password = getpass(f"SMTP password for user {self._login}: ")
         ngroups = len(self._mails)//25+1
+        i=0
         for group in range(ngroups):
             mailserver = smtplib.SMTP(self._host, self._port)
             mailserver.ehlo()
@@ -85,9 +88,14 @@ class Mailer:
                     mailserver.login(self._login, self._password)
             for mail in self._mails[group::ngroups]:
                 mailserver.send_message(mail.to_email())
+                i+=1
+                if self._progress:
+                    print(f"\rSending mails… {i}/{len(self._mails)} ", end='', file=sys.stderr)
                 time.sleep(wait)
             del mailserver
         self._mails.clear()
+        if self._progress:
+            print("\r                                      \r", end='', file=sys.stderr)
 
     def _show_mails_in_pager(self):
         pager = os.environ.get("PAGER", "less")
