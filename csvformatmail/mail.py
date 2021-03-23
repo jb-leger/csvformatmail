@@ -75,7 +75,7 @@ class Mailer:
         self._mails.append(mail)
 
     def send_mails(self, wait=0):
-        if self._password is None:
+        if self._login is not None and self._password is None:
             self._password = getpass(f"SMTP password for user {self._login}: ")
         ngroups = len(self._mails)//25+1
         i=0
