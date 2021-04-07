@@ -133,9 +133,9 @@ class Mailer:
             if choice == "quit":
                 return None
             elif choice == "send":
-                validation = "I want send {number} mails."
+                validation = "I want to send {number} mails."
                 print(
-                    f'To confirme, type "{validation.format(number="<number>")}"',
+                    f'To confirm, type "{validation.format(number="<number>")}"',
                     file=sys.stderr,
                 )
                 sentence = input("Confirmation: ")
