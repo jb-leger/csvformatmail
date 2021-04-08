@@ -28,7 +28,7 @@ __title__ = "csvformatmail"
 __author__ = "Jean-Benoist Leger"
 __licence__ = "MIT"
 
-version_info = (0, 5)
+version_info = (0, 6)
 __version__ = ".".join(map(str, version_info))
 
 from .mail import (
